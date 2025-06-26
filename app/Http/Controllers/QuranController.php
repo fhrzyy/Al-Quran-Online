@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Request;
 
 class QuranController extends Controller
 {
@@ -25,14 +26,17 @@ class QuranController extends Controller
 
     public function showSurah($id)
 {
-    $surah = Http::get("https://equran.id/api/surat/{$id}")->json();
-    $allSurah = Http::get("https://equran.id/api/surat")->json();
+    $response = Http::get('https://equran.id/api/surat/' . $id);
+    $surah = $response->json();
 
-    return view('quran.detail', [
-        'surah' => $surah,
-        'allSurah' => $allSurah
-    ]);
+    $all = Http::get('https://equran.id/api/surat');
+    $allSurah = $all->json();
+
+    return view('quran.detail', compact('surah', 'allSurah'));
+
 }
+
+
 
 
 }

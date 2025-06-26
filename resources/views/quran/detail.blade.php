@@ -94,7 +94,7 @@ body.dark-mode a {
 </head>
 
 <body id="body">
-    
+
     <button id="toggle-dark" style="position: fixed; top: 20px; right: 20px; z-index: 999; padding: 8px 12px; border: none; border-radius: 5px; background-color: #00a884; color: white; cursor: pointer;">
         🌙 Dark Mode
     </button>
@@ -104,12 +104,17 @@ body.dark-mode a {
         Jumlah Ayat: {{ $surah['jumlah_ayat'] }} | Tempat Turun: {{ $surah['tempat_turun'] }}
     </div>
 
+<form id="searchForm" onsubmit="return redirectToSurah(event)" style="text-align: center; margin: 20px 0;">
+    <input type="text" id="searchInput" placeholder="Cari nama surat..." style="padding: 10px; width: 60%; border-radius: 5px; border: 1px solid #ccc;">
+    <button type="submit" style="padding: 10px 15px; border: none; border-radius: 5px; background-color: #00a884; color: white; margin-left: 10px;">🔍 Cari</button>
+</form>
+
     {{-- 🔻 TOMBOL NAVIGASI DISINI --}}
     @php
         $current = $surah['nomor'];
         $prev = $current > 1 ? $current - 1 : null;
         $next = $current < 114 ? $current + 1 : null;
-    
+
         // Ambil nama surat dari $allSurah
         $getSurahName = function($nomor) use ($allSurah) {
             foreach ($allSurah as $s) {
@@ -120,7 +125,7 @@ body.dark-mode a {
             return null;
         };
     @endphp
-    
+
     <div style="text-align: center; margin-bottom: 30px;">
         @if($prev)
             <a href="{{ url('/surah/' . $prev) }}"
@@ -128,7 +133,7 @@ body.dark-mode a {
                 ← {{ $getSurahName($prev) }}
             </a>
         @endif
-    
+
         @if($next)
             <a href="{{ url('/surah/' . $next) }}"
                style="padding: 10px 15px; background-color: #00a884; color: white; border-radius: 6px; text-decoration: none;">
@@ -136,15 +141,13 @@ body.dark-mode a {
             </a>
         @endif
     </div>
-    
+
     @if(isset($surah['audio']))
     <audio controls style="width: 100%; margin-bottom: 20px;">
         <source src="{{ $surah['audio'] }}" type="audio/mpeg">
         Browser tidak mendukung pemutar audio.
     </audio>
 @endif
-
-
 
 {{-- 🔻 AYAT MULAI DARI SINI --}}
 @foreach ($surah['ayat'] as $ayat)
@@ -178,6 +181,37 @@ body.dark-mode a {
 </script>
 
 
+</body>
+<script>
+    const allSurah = @json($allSurah); // Data semua surat dari controller
+
+    function redirectToSurah(e) {
+    e.preventDefault();
+
+    const input = normalize(document.getElementById('searchInput').value);
+
+    const found = allSurah.find(surah =>
+        normalize(surah.nama_latin).startsWith(input) ||
+        normalize(surah.nama_latin).includes(input)
+    );
+
+    if (found) {
+        window.location.href = '/surah/' + found.nomor;
+    } else {
+        alert('Surah tidak ditemukan!');
+    }
+}
+
+// Tambahkan fungsi bantu ini
+function normalize(str) {
+    return str.toLowerCase()
+              .replace(/[-\s]/g, '') // hilangkan strip dan spasi
+              .normalize("NFD")      // hilangkan tanda baca Latin (jika ada)
+              .replace(/[\u0300-\u036f]/g, '');
+}
+
+
+</script>
 </body>
 
 </html>
